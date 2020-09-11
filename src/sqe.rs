@@ -368,6 +368,11 @@ impl<'a> SubmissionQueueEvent<'a> {
     }
 
     #[inline]
+    pub unsafe fn prep_cancel(&mut self, user_data: u64) {
+        uring_sys::io_uring_prep_cancel(self.sqe, user_data as _, 0);
+    }
+
+    #[inline]
     pub unsafe fn prep_connect(&mut self, fd: RawFd, socket_addr: &SockAddr) {
         let (addr, len) = socket_addr.as_ffi_pair();
         uring_sys::io_uring_prep_connect(self.sqe, fd, addr as *const _ as *mut _, len);
