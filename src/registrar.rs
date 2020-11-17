@@ -42,10 +42,23 @@ impl<'ring> Registrar<'ring> {
         Ok(())
     }
 
-    pub fn unregister_files(&self) -> io::Result<()> {
+    pub fn register_files_update(&self, offset: usize, files: &[RawFd]) -> io::Result<()> {
+        let len = files.len();
+        let addr = files.as_ptr();
         let _: i32 = resultify!(unsafe {
-            uring_sys::io_uring_unregister_files(self.ring.as_ptr())
+            uring_sys::io_uring_register_files_update(
+                self.ring.as_ptr(),
+                offset as _,
+                addr,
+                len as _,
+            )
         })?;
+        Ok(())
+    }
+
+    pub fn unregister_files(&self) -> io::Result<()> {
+        let _: i32 =
+            resultify!(unsafe { uring_sys::io_uring_unregister_files(self.ring.as_ptr()) })?;
         Ok(())
     }
 
