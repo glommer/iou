@@ -310,6 +310,22 @@ impl<'a> SubmissionQueueEvent<'a> {
                                         size as _);
     }
 
+    /// Issue an update to the registered file table.
+    ///
+    /// The `fds` argument is the entire table of file descriptors, not just the
+    /// ones that changed. However io_uring will only scan it starting at offset so if
+    /// files before a certain offset hasn't changed (for instance, if you are just
+    /// adding a file) you can take advantage of that.
+    #[inline]
+    pub unsafe fn prep_files_update(&mut self, fds: &mut [RawFd], offset: usize) {
+        uring_sys::io_uring_prep_files_update(
+            self.sqe,
+            fds.as_mut_ptr(),
+            fds.len() as _,
+            offset as _,
+        )
+    }
+
     /// Prepare a timeout event.
     /// ```
     /// # use iou::IoUring;
