@@ -478,6 +478,7 @@ impl<'a> SubmissionQueueEvent<'a> {
 unsafe impl<'a> Send for SubmissionQueueEvent<'a> { }
 unsafe impl<'a> Sync for SubmissionQueueEvent<'a> { }
 
+#[derive(Debug)]
 pub struct SockAddrStorage {
     storage: mem::MaybeUninit<nix::sys::socket::sockaddr_storage>,
     len: usize,
