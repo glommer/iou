@@ -68,7 +68,8 @@ pub use nix::sys::socket::{
     NetlinkAddr,
     AlgAddr,
     LinkAddr,
-    VsockAddr
+    VsockAddr,
+    MsgFlags,
 };
 
 bitflags::bitflags! {

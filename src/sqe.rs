@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 use std::time::Duration;
 
 use super::IoUring;
-use super::{PollFlags, SockAddr, SockFlag};
+use super::{PollFlags, SockAddr, SockFlag, MsgFlags};
 
 /// The queue of pending IO events.
 ///
@@ -293,6 +293,34 @@ impl<'a> SubmissionQueueEvent<'a> {
                                        len as _,
                                        offset as _,
                                        buf_index as _);
+    }
+
+    /// Prepare a recv event on a file descriptor.
+    #[inline]
+    pub unsafe fn prep_recv(&mut self, fd: RawFd, buf: &mut [u8], flags: MsgFlags) {
+        let data = buf.as_mut_ptr() as *mut libc::c_void;
+        let len = buf.len();
+        uring_sys::io_uring_prep_recv(self.sqe, fd, data, len, flags.bits());
+    }
+
+    /// Prepare a send event on a file descriptor.
+    #[inline]
+    pub unsafe fn prep_send(&mut self, fd: RawFd, buf: &[u8], flags: MsgFlags) {
+        let data = buf.as_ptr() as *const libc::c_void as *mut libc::c_void;
+        let len = buf.len();
+        uring_sys::io_uring_prep_send(self.sqe, fd, data, len, flags.bits());
+    }
+
+    /// Prepare a recvmsg event on a file descriptor.
+    #[inline]
+    pub unsafe fn prep_recvmsg(&mut self, fd: RawFd, msg: *mut libc::msghdr, flags: MsgFlags) {
+        uring_sys::io_uring_prep_recvmsg(self.sqe, fd, msg, flags.bits() as _);
+    }
+
+    /// Prepare a sendmsg event on a file descriptor.
+    #[inline]
+    pub unsafe fn prep_sendmsg(&mut self, fd: RawFd, msg: *mut libc::msghdr, flags: MsgFlags) {
+        uring_sys::io_uring_prep_sendmsg(self.sqe, fd, msg, flags.bits() as _);
     }
 
     #[inline]
